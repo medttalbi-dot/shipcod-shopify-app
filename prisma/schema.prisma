@@ -1,0 +1,43 @@
+// Shopify sessions (managed by @shopify/shopify-app-session-storage-prisma)
+// ShipCOD config per shop
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+}
+
+model ShopConfig {
+  id              String   @id @default(cuid())
+  shop            String   @unique
+  // KEY_CODE stored in plain text (not sensitive — used in URL params by design)
+  keyCode         String
+  // SECRET_CODE encrypted at rest with AES-256-GCM
+  encryptedSecret String
+  // Shopify webhook GID, e.g. "gid://shopify/WebhookSubscription/1234567890"
+  webhookId       String?
+  isConnected     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
